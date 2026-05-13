@@ -1341,13 +1341,13 @@ $(document).ready(function() {
     openOrderDetail(orderNo);
   });
 
-  // 보상 수동 확정 버튼
+  // 보상 수동 확정 버튼 (송장기준만 가능)
   $('.btn-action').filter(function() {
     return $(this).text().trim() === '보상 수동 확정';
   }).on('click', function() {
     const checked = $('#rewardTable tbody input[type=checkbox]:checked').closest('tr');
     if (checked.length === 0) {
-      alert('주문을 선택해주세요.');
+      alert('송장을 선택해주세요.');
       return;
     }
     // 주문기준 건은 수동 보상 불가 (피드백 메모 기준)
@@ -1379,7 +1379,8 @@ $(document).ready(function() {
   function openExcludeModal(criterionType) {
     const checked = $('#rewardTable tbody input[type=checkbox]:checked').closest('tr');
     if (checked.length === 0) {
-      alert('주문을 선택해주세요.');
+      const target = criterionType === '송장기준' ? '송장' : '주문';
+      alert(target + '을 선택해주세요.');
       return;
     }
     // 선택 건이 모두 같은 집계기준이어야 함 (피드백 메모 기준)
