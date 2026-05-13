@@ -2,86 +2,1466 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>A2G 배송지연 보상 관리 어드민</title>
+<title>A2G 배송지연 보상 관리</title>
+
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" rel="stylesheet">
+<script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
 <style>
-  body { font-family: 'Malgun Gothic', sans-serif; background: #f5f5f5; padding: 40px; }
-  .container { max-width: 720px; }
+  body { font-size: 12px; color: #333; background: #fff; }
   .page-title {
     background-color: #ecf0f1;
-    padding: 20px;
-    font-size: 22px;
+    padding: 16px 20px;
+    font-size: 17px;
     font-weight: bold;
+    text-align: left;
+    color: #333;
+    margin-bottom: 12px;
     border-radius: 4px;
-    margin-bottom: 20px;
   }
-  .desc { color: #666; font-size: 14px; margin-bottom: 30px; }
-  .menu-card {
+  .card.search-card {
+    background-color: #f5f5f5;
+    box-shadow: 0px 2px 4px rgba(0,0,0,0.1);
+    font-size: 12px;
+    padding: 12px 16px !important;
+    max-width: 100%;
+  }
+  .card.search-card .row-search {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  .card.search-card .row-search > [class*="col-"] {
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+  .card.search-card .row-search > .label-col {
+    padding-left: 0;
+  }
+  .table th {
+    border: 1px solid rgba(222, 226, 230, 0.5);
+    background-color: #f8f9fa;
+    font-weight: normal !important;
+    text-align: center;
+    font-size: 11px;
+    padding: 3px 4px;
+    white-space: nowrap;
+    vertical-align: middle;
+    line-height: 1.3;
+  }
+  .table td {
+    border: 1px solid rgba(222, 226, 230, 0.5);
+    text-align: center;
+    font-size: 11px;
+    padding: 3px 4px;
+    white-space: nowrap;
+    vertical-align: middle;
+    line-height: 1.3;
+  }
+  .table td a { font-size: 11px; }
+  .form-select, .form-control {
+    font-size: 12px;
+    padding: 3px 8px;
+    height: auto;
+    min-height: 28px;
+  }
+  .form-select-sm, .form-control-sm { font-size: 12px; min-height: 28px; }
+  .btn-sm { font-size: 12px; padding: 3px 10px; }
+  .btn-preset { background-color: #dee0e3; border-color: #dee0e3; color: #333; margin-right: 4px; padding: 3px 8px; }
+  .btn-search { background-color: #18bc9c; border-color: #18bc9c; color: #fff; }
+  .btn-copy { background-color: #edde34; border-color: #edde34; color: #fff; }
+  .btn-excel { background-color: #3498db; border-color: #3498db; color: #fff; }
+  .btn-action { background-color: #fff; border: 1px solid #ced4da; color: #333; padding: 3px 10px; font-size: 12px; }
+  .label-col {
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: left;
+    white-space: nowrap;
+    flex: 0 0 115px;
+    max-width: 115px;
+    padding-left: 0;
+    padding-right: 6px;
+    font-size: 12px;
+  }
+  /* 같은 row 안에 다중 레이블이 있을 때, 텍스트 너비에 맞춰 자동 width + 좌측 그룹 여백 */
+  .row-search > [class*="col-"] + .label-col {
+    flex: 0 0 auto !important;
+    max-width: none !important;
+    width: auto !important;
+    padding-left: 20px;
+    padding-right: 8px;
+  }
+  .row-search {
+    margin-top: 3px;
+    margin-bottom: 3px;
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .checkbox-group {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center;
+    row-gap: 4px;
+  }
+  .table-wrap { border: 1px solid #dee0e3; border-radius: 5px; padding: 8px; overflow-x: auto; }
+  .badge-new { display: none !important; }
+  .text-new { color: #333; font-weight: normal; }
+  td.new-col { background: transparent !important; }
+  tr.new-row > td { background: transparent !important; }
+  .checkbox-group label { margin-right: 10px; font-size: 12px; cursor: pointer; }
+  .checkbox-group input { margin-right: 3px; vertical-align: middle; }
+  .nav-link-light {
+    color: #fff !important;
+    font-size: 12px;
+    padding: 0 14px;
+    text-decoration: none;
+  }
+  .nav-link-light:hover { color: #5cd9c1 !important; }
+  .nav-home-icon {
+    color: #fff !important;
+    font-size: 15px;
+    padding: 0 10px 0 4px;
+    text-decoration: none;
+  }
+  .nav-menu-btn {
+    background: transparent;
+    border: 1px solid #555;
+    color: #fff;
+    padding: 2px 10px;
+    font-size: 14px;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  .nav-menu-btn:hover { background: #333; }
+  .breadcrumb-bar { background-color: #f8f9fa !important; padding: 6px 16px; font-size: 12px; }
+  .breadcrumb-bar .current { color: #28a745; font-weight: bold; }
+  .breadcrumb-bar .desc { color: #6c757d; margin-left: 10px; }
+  .nav-icon-link { color: #6c757d; text-decoration: none; margin-left: 10px; font-size: 12px; }
+  .input-group-text { font-size: 12px; padding: 3px 8px; }
+
+  /* 섹션 제목 (h2) */
+  .section-h2 {
+    font-size: 14px;
+    font-weight: bold;
+    margin: 16px 0 10px;
+    padding-left: 10px;
+    border-left: 4px solid #4a5568;
+  }
+  .section-divider { border: none; border-top: 2px solid #4a5568; margin: 32px 0 16px; }
+
+  /* 집계 내역 테이블 */
+  .table-summary { width: 100%; border-collapse: collapse; }
+  .table-summary th {
+    border: 1px solid rgba(222, 226, 230, 0.5);
+    background-color: #f8f9fa;
+    font-weight: normal;
+    text-align: center;
+    font-size: 11px;
+    padding: 3px 4px;
+    white-space: nowrap;
+    vertical-align: middle;
+    line-height: 1.3;
+  }
+  .table-summary th.text-new { background-color: #f8f9fa; color: #333; }
+  .table-summary td {
+    border: 1px solid rgba(222, 226, 230, 0.5);
+    text-align: center;
+    font-size: 11px;
+    padding: 3px 4px;
+    white-space: nowrap;
+    vertical-align: middle;
+    line-height: 1.3;
+  }
+  .table-summary td.new-col { background: transparent !important; }
+  .formula-note {
     background: #fff;
     border: 1px solid #dee0e3;
-    border-radius: 6px;
-    padding: 20px 24px;
-    margin-bottom: 14px;
-    text-decoration: none;
-    color: #333;
-    display: block;
-    transition: all 0.2s;
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-size: 11px;
+    color: #555;
+    margin-bottom: 8px;
   }
-  .menu-card:hover {
-    border-color: #18bc9c;
-    box-shadow: 0 2px 8px rgba(24, 188, 156, 0.15);
-    color: #333;
-    text-decoration: none;
+
+  /* 주문정보 상세 모달 */
+  .order-detail-modal .modal-dialog { max-width: 600px; }
+  .order-detail-modal .modal-header {
+    background: #4a5568;
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 0;
   }
-  .menu-title { font-size: 16px; font-weight: bold; margin-bottom: 6px; color: #18bc9c; }
-  .menu-desc { font-size: 13px; color: #666; line-height: 1.5; }
-  .info-box {
+  .order-detail-modal .modal-header .modal-title { font-size: 14px; font-weight: bold; }
+  .order-detail-modal .modal-header .btn-close { filter: invert(1); }
+  .order-detail-modal .modal-body { padding: 14px 18px; }
+  .section-title {
+    font-weight: bold;
+    font-size: 13px;
+    margin-top: 14px;
+    margin-bottom: 6px;
+    border-left: 3px solid #4a5568;
+    padding-left: 8px;
+  }
+  .section-title:first-child { margin-top: 0; }
+  .table-detail {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    table-layout: fixed;
+  }
+  .table-detail th {
+    background: #f0f0f0;
+    padding: 4px 8px;
+    text-align: left;
+    font-weight: normal;
+    border: 1px solid #ddd;
+    width: 85px;
+    vertical-align: middle;
+    font-size: 11px;
+  }
+  .table-detail td {
+    padding: 4px 8px;
+    border: 1px solid #ddd;
+    background: #fff;
+    vertical-align: middle;
+    word-wrap: break-word;
+    font-size: 11px;
+  }
+  .table-detail td.value-bold { font-weight: bold; }
+
+  /* 보상 수동 처리 모달 */
+  .reward-confirm-modal .modal-dialog { max-width: 380px; }
+  .reward-confirm-modal .modal-header {
+    background: #4a5568;
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 0;
+  }
+  .reward-confirm-modal .modal-header .modal-title { font-size: 13px; font-weight: bold; }
+  .reward-confirm-modal .modal-header .btn-close { filter: invert(1); }
+  .reward-confirm-modal .modal-body { padding: 14px 16px; font-size: 12px; }
+  .reward-confirm-modal .info-text {
+    background: #f8f9fa;
+    padding: 8px 10px;
+    border-radius: 3px;
+    font-size: 12px;
+    margin-bottom: 12px;
+    color: #555;
+  }
+  .reward-confirm-modal .form-row {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 6px;
+  }
+  .reward-confirm-modal .form-row label {
+    width: 110px;
+    font-weight: normal;
+    padding-top: 4px;
+    flex-shrink: 0;
+    font-size: 12px;
+  }
+  .reward-confirm-modal .form-row input,
+  .reward-confirm-modal .form-row textarea {
+    flex: 1;
+    border: 1px solid #ddd;
+    padding: 4px 8px;
+    font-size: 12px;
+    background: #f8f9fa;
+    border-radius: 3px;
+  }
+  .reward-confirm-modal .form-row textarea {
+    resize: vertical;
+    min-height: 56px;
+    background: #fff;
+  }
+  .reward-confirm-modal .warning-box {
     background: #fff8e1;
     border: 1px solid #f0c869;
-    border-radius: 4px;
-    padding: 12px 16px;
+    border-radius: 3px;
+    padding: 8px 10px;
+    font-size: 11px;
+    color: #b7791f;
+    margin-top: 12px;
+    text-align: center;
+  }
+  .reward-confirm-modal .confirm-text {
+    text-align: center;
+    margin-top: 10px;
+    margin-bottom: 0;
     font-size: 12px;
-    color: #8a6d3b;
-    margin-top: 24px;
-    line-height: 1.6;
+    color: #555;
+  }
+  .reward-confirm-modal .modal-footer {
+    padding: 10px;
+    justify-content: center;
+    gap: 8px;
+  }
+  .reward-confirm-modal .modal-footer .btn {
+    min-width: 80px;
+    font-size: 12px;
+    padding: 5px 12px;
+  }
+
+  /* 보상제외(수동) 상태변경 모달 */
+  .exclude-modal .modal-dialog { max-width: 360px; }
+  .exclude-modal .modal-header {
+    background: #4a5568;
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 0;
+  }
+  .exclude-modal .modal-header .modal-title { font-size: 13px; font-weight: bold; }
+  .exclude-modal .modal-header .btn-close { filter: invert(1); }
+  .exclude-modal .modal-body { padding: 14px 16px; font-size: 12px; }
+  .exclude-modal .info-text {
+    background: #f8f9fa;
+    padding: 8px 10px;
+    border-radius: 3px;
+    font-size: 12px;
+    margin-bottom: 12px;
+    color: #555;
+  }
+  .exclude-modal .form-row {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 8px;
+  }
+  .exclude-modal .form-row > label {
+    width: 80px;
+    font-weight: normal;
+    padding-top: 4px;
+    flex-shrink: 0;
+    font-size: 12px;
+  }
+  .exclude-modal .form-row textarea {
+    flex: 1;
+    border: 1px solid #ddd;
+    padding: 4px 8px;
+    font-size: 12px;
+    background: #fff;
+    border-radius: 3px;
+    resize: vertical;
+    min-height: 70px;
+  }
+  .exclude-modal .radio-group label {
+    margin-right: 12px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .exclude-modal .radio-group input {
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+  .exclude-modal .notice-box {
+    background: #fff8e1;
+    border: 1px solid #f0c869;
+    border-radius: 3px;
+    padding: 8px 12px;
+    font-size: 11px;
+    color: #b7791f;
+    margin-top: 12px;
+  }
+  .exclude-modal .notice-box ul {
+    margin: 0;
+    padding-left: 16px;
+  }
+  .exclude-modal .notice-box li {
+    margin-bottom: 3px;
+    line-height: 1.5;
+  }
+  .exclude-modal .notice-box li:last-child { margin-bottom: 0; }
+  .exclude-modal .modal-footer {
+    padding: 10px;
+    justify-content: center;
+    gap: 8px;
+  }
+  .exclude-modal .modal-footer .btn {
+    min-width: 80px;
+    font-size: 12px;
+    padding: 5px 12px;
   }
 </style>
 </head>
 <body>
 
-<div class="container">
+<!-- 네비바 1단: 사용자/로그아웃 -->
+<nav class="navbar navbar-expand-sm navbar-dark bg-dark py-1">
+  <div class="container-fluid">
+    <span class="text-light" style="font-size: 12px;">
+      2026-05-11 14:32 | soomchoi (관리자) | 10.0.0.123 |
+      <a href="#" class="text-light text-decoration-none">로그아웃</a>
+    </span>
+    <div class="d-flex">
+      <button class="btn btn-secondary btn-sm me-1">Wiki</button>
+      <button class="btn btn-info btn-sm me-1">대결 관리</button>
+      <button class="btn btn-success btn-sm me-1">즐겨찾기 관리</button>
+      <button class="btn btn-warning btn-sm me-1">메뉴 권한 신청</button>
+      <button class="btn btn-info btn-sm me-1">전체 메뉴 보기</button>
+      <input type="text" class="form-control form-control-sm" placeholder="메뉴검색" style="width: 140px;">
+    </div>
+  </div>
+</nav>
 
-  <div class="page-title">A2G 배송지연 보상 관리 어드민 (PRD 시안)</div>
+<!-- 네비바 2단: 즐겨찾기 -->
+<nav class="navbar navbar-dark bg-dark py-1">
+  <div class="container-fluid d-flex justify-content-between align-items-center">
+    <div class="d-flex align-items-center">
+      <a href="index.html" class="nav-home-icon">🏠</a>
+      <a href="index.html" class="nav-link-light">배송지연 보상 관리</a>
+      <a href="#" class="nav-link-light">도착보장 보상관리</a>
+      <a href="#" class="nav-link-light">A2G 주문 관리</a>
+      <a href="#" class="nav-link-light">수거지시 관리</a>
+    </div>
+    <button class="nav-menu-btn">☰</button>
+  </div>
+</nav>
 
-  <p class="desc">
-    A2G(셀렉티) 상품의 배송지연 보상 어드민 PRD 시안입니다.<br>
-    한반도 어드민(G마켓 내부 어드민) 디자인시스템 기반으로 작성되었습니다.
+<!-- 네비바 3단: 브레드크럼 -->
+<nav class="breadcrumb-bar">
+  <div class="container-fluid d-flex justify-content-between align-items-center">
+    <div>
+      <span>A2G</span>
+      <span> &gt; </span>
+      <span>배송 관리</span>
+      <span> &gt; </span>
+      <span class="current">배송지연 보상 관리</span>
+      <span class="desc">A2G(셀렉티) 배송지연 보상 대상 건의 보상 처리 내역과 일자별 집계를 관리합니다.</span>
+    </div>
+    <div>
+      <a href="#" class="nav-icon-link">📄 Wiki</a>
+      <a href="#" class="nav-icon-link">✉ 담당PM</a>
+      <a href="#" class="nav-icon-link">✉ 담당PD</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container-fluid mt-2" style="padding: 0 12px;">
+
+  <!-- 페이지 제목 -->
+  <div class="page-title">A2G 배송지연 보상 관리</div>
+
+  <p class="text-muted" style="font-size: 0.9rem;">
+    * 도착보장일까지 배송 완료되지 않은 A2G(셀렉티) 주문에 대해 1,500원 쿠폰을 발행합니다. (쿠폰 사용 여부는 본 어드민에서 관리하지 않습니다.)
   </p>
 
-  <a href="reward-list.html" class="menu-card">
-    <div class="menu-title">1. 배송지연 보상 내역 관리</div>
-    <div class="menu-desc">
-      개별 보상 건의 조회, 수동 보상 확정, 수동 보상 제외(송장기준/주문기준) 처리 화면.
-      도착보장일 초과 건의 쿠폰 발행 대상을 운영자가 검토하고 처리합니다.
-    </div>
-  </a>
+  <h2 class="section-h2">1. 보상 내역 관리</h2>
 
-  <a href="reward-summary.html" class="menu-card">
-    <div class="menu-title">2. 배송지연 보상 집계 내역</div>
-    <div class="menu-desc">
-      일자별 보상 집계 현황 조회. 도착보장 합계, 보상 확정 건수, 미보상 건수, 쿠폰 발행 결과(송장/주문), 도착보장율 등을 한눈에 볼 수 있습니다.
-    </div>
-  </a>
+  <!-- 검색 카드 -->
+  <div class="card search-card p-3 shadow-sm mb-4">
 
-  <div class="info-box">
-    <b>참고</b><br>
-    • 본 화면은 PRD 산출물로, 실제 운영 데이터가 아닌 샘플 데이터입니다.<br>
-    • 쿠폰 발행 금액: 송장당 1,500원 (스마일캐시 → 쿠폰으로 정책 변경)<br>
-    • 보상 비용 주체: G마켓 전액 (택배사 귀책 미배달코드도 G마켓 부담)<br>
-    • 본 어드민에서는 쿠폰 발행 건수만 집계되며, 쿠폰 사용 여부는 관리하지 않습니다.
+    <!-- 주문번호 / 송장번호 -->
+    <div class="row row-search">
+      <div class="col-md-1 label-col">주문번호</div>
+      <div class="col-md-5">
+        <input type="text" class="form-control form-control-sm" placeholder="복수 건 검색 시 쉼표 또는 엔터로 구분하여 입력해주세요.">
+      </div>
+      <div class="col-md-1 label-col">송장번호</div>
+      <div class="col-md-5">
+        <input type="text" class="form-control form-control-sm" placeholder="복수 건 검색 시 쉼표 또는 엔터로 구분하여 입력해주세요.">
+      </div>
+    </div>
+
+    <!-- 사이트 -->
+    <div class="row row-search">
+      <div class="col-md-1 label-col">사이트</div>
+      <div class="col-md-3">
+        <select class="form-select form-select-sm">
+          <option>전체</option>
+          <option>G마켓</option>
+          <option>옥션</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- 보상상태 -->
+    <div class="row row-search">
+      <div class="col-md-1 label-col">보상상태</div>
+      <div class="col-md-11 d-flex align-items-center checkbox-group flex-wrap">
+        <label><input type="checkbox" checked> 전체</label>
+        <label><input type="checkbox"> 처리대기</label>
+        <label><input type="checkbox" checked> 대상집계</label>
+        <label><input type="checkbox" checked> 대상확정</label>
+        <label class="text-new"><input type="checkbox" checked> 대상확정(미발송)<span class="badge-new">New</span></label>
+        <label><input type="checkbox"> 미배달(미보상)</label>
+        <label><input type="checkbox"> 보상처리(수동)</label>
+        <label><input type="checkbox"> 보상제외(수동)</label>
+        <label><input type="checkbox"> 배송완료(미보상)</label>
+        <label class="text-new"><input type="checkbox"> 대상제외(분리포배송)<span class="badge-new">New</span></label>
+        <label class="text-new"><input type="checkbox"> 대상제외(클레임)<span class="badge-new">New</span></label>
+      </div>
+    </div>
+
+    <!-- 보상집계기준 -->
+    <div class="row row-search">
+      <div class="col-md-1 label-col text-new">보상집계기준 <span class="badge-new">New</span></div>
+      <div class="col-md-3">
+        <select class="form-select form-select-sm">
+          <option>전체</option>
+          <option>송장기준</option>
+          <option>주문기준</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- 보상귀책 -->
+    <div class="row row-search">
+      <div class="col-md-1 label-col">보상귀책</div>
+      <div class="col-md-11 d-flex align-items-center checkbox-group">
+        <label><input type="checkbox" checked> 전체</label>
+        <label><input type="checkbox" checked> 택배사</label>
+        <label><input type="checkbox" checked> 알리</label>
+        <label><input type="checkbox" checked> 고객</label>
+        <label><input type="checkbox" checked> 미보상</label>
+      </div>
+    </div>
+
+    <!-- 보상지급요청 -->
+    <div class="row row-search">
+      <div class="col-md-1 label-col">보상지급요청</div>
+      <div class="col-md-3">
+        <select class="form-select form-select-sm">
+          <option>보상지급요청여부</option>
+          <option>요청전</option>
+          <option>요청완료</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <select class="form-select form-select-sm">
+          <option>보상요청상태</option>
+          <option>요청전</option>
+          <option>전송성공</option>
+          <option>전송실패</option>
+          <option>재전송실패</option>
+          <option>수동전송성공</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <select class="form-select form-select-sm">
+          <option>보상지급상태</option>
+          <option>처리대기</option>
+          <option>지급완료</option>
+          <option>지급실패</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- 택배사/미배달사유 + 알림톡 -->
+    <div class="row row-search">
+      <div class="col-md-1 label-col">택배사</div>
+      <div class="col-md-3">
+        <select class="form-select form-select-sm">
+          <option>CJ대한통운</option>
+        </select>
+      </div>
+      <div class="col-md-1 label-col">미배달사유</div>
+      <div class="col-md-3">
+        <select class="form-select form-select-sm">
+          <option>전체</option>
+        </select>
+      </div>
+      <div class="col-md-1 label-col">알림톡</div>
+      <div class="col-md-3">
+        <select class="form-select form-select-sm">
+          <option>전체</option>
+          <option>발송전</option>
+          <option>발송성공</option>
+          <option>발송실패</option>
+          <option>재발송실패</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- 기간 -->
+    <div class="row row-search">
+      <div class="col-md-1 label-col">일자검색</div>
+      <div class="col-md-2">
+        <select class="form-select form-select-sm">
+          <option>도착보장일</option>
+          <option>발송마감일</option>
+          <option>배송완료일</option>
+          <option>보상확정일</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <div class="input-group input-group-sm">
+          <input type="date" class="form-control" value="2026-03-31">
+          <span class="input-group-text">~</span>
+          <input type="date" class="form-control" value="2026-04-01">
+        </div>
+      </div>
+      <div class="col-md-5 d-flex align-items-center">
+        <button class="btn btn-sm btn-preset">오늘</button>
+        <button class="btn btn-sm btn-preset">1주일</button>
+        <button class="btn btn-sm btn-preset">1개월</button>
+        <button class="btn btn-sm btn-preset">3개월</button>
+      </div>
+    </div>
+
+    <!-- 액션 버튼 -->
+    <div class="row row-search mt-3">
+      <div class="col-md-12 text-center">
+        <button class="btn btn-sm btn-search me-2" style="padding: 5px 30px;">조회</button>
+        <button class="btn btn-sm btn-secondary" style="padding: 5px 30px;">초기화</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 기능 버튼 + 결과수 + 엑셀 -->
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <div>
+      <button class="btn btn-sm btn-action me-1">주문정보 상세보기</button>
+      <button class="btn btn-sm btn-action me-1">보상 수동 확정</button>
+      <button class="btn btn-sm btn-action me-1">송장기준 보상제외(수동)</button>
+      <button class="btn btn-sm btn-action me-1">주문기준 보상제외(수동)</button>
+      <button class="btn btn-sm btn-action">보상상태 변경이력</button>
+      <span class="ms-3" style="font-size: 13px; font-weight: bold;">검색 결과: 1,403건</span>
+    </div>
+    <div>
+      <button class="btn btn-sm btn-copy me-1">클립보드로 전체복사</button>
+      <button class="btn btn-sm btn-excel">엑셀 다운로드</button>
+    </div>
+  </div>
+
+  <!-- 데이터 테이블 -->
+  <div class="table-wrap">
+    <table id="rewardTable" class="table table-bordered table-hover">
+      <thead>
+        <tr>
+          <th><input type="checkbox"></th>
+          <th>송장번호</th>
+          <th>주문번호</th>
+          <th>장바구니번호</th>
+          <th>사이트</th>
+          <th>상품번호</th>
+          <th>판매자ID</th>
+          <th>주문배송상태</th>
+          <th>택배사</th>
+          <th>택배배송상태</th>
+          <th>보상상태</th>
+          <th class="text-new">보상집계기준</th>
+          <th>보상귀책</th>
+          <th>보상사유</th>
+          <th>보상제외사유</th>
+          <th>보상상세사유</th>
+          <th>도착보장일</th>
+          <th>배송완료일</th>
+          <th>보상대상확정일</th>
+          <th>보상지급요청상태</th>
+          <th>보상지급상태</th>
+          <th>보상지급일시</th>
+          <th>알림톡발송여부</th>
+          <th>알림톡발송일</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><input type="checkbox"></td>
+          <td><a href="#">595146673001</a></td>
+          <td><a href="#">4361669123</a></td>
+          <td>5479185986</td>
+          <td>G마켓</td>
+          <td>3796119016</td>
+          <td>a2gbj5</td>
+          <td>구매결정완료</td>
+          <td>CJ</td>
+          <td>배송완료</td>
+          <td>대상확정</td>
+          <td class="new-col">송장기준</td>
+          <td>택배사</td>
+          <td>-</td>
+          <td>-</td>
+          <td>-</td>
+          <td>2026-03-31</td>
+          <td>2026-04-01</td>
+          <td>2026-04-01 07:37</td>
+          <td>전송성공</td>
+          <td>처리대기</td>
+          <td>-</td>
+          <td>전송성공</td>
+          <td>2026-04-01</td>
+        </tr>
+        <tr class="new-row">
+          <td><input type="checkbox"></td>
+          <td>-</td>
+          <td><a href="#">4361669252</a></td>
+          <td>5479185987</td>
+          <td>G마켓</td>
+          <td>3796119015</td>
+          <td>a2gbj5</td>
+          <td>배송준비중</td>
+          <td>-</td>
+          <td>-</td>
+          <td class="text-new">대상확정(미발송)</td>
+          <td><b>주문기준</b></td>
+          <td>알리</td>
+          <td>미발송</td>
+          <td>-</td>
+          <td>-</td>
+          <td>2026-03-31</td>
+          <td>-</td>
+          <td>2026-04-01 07:37</td>
+          <td>수동전송성공</td>
+          <td>처리대기</td>
+          <td>-</td>
+          <td>전송성공</td>
+          <td>2026-04-01</td>
+        </tr>
+        <tr class="new-row">
+          <td><input type="checkbox"></td>
+          <td><a href="#">510884608771</a></td>
+          <td><a href="#">4361669253</a></td>
+          <td>5479185988</td>
+          <td>G마켓</td>
+          <td>3796119015</td>
+          <td>a2gbj5</td>
+          <td>배송중</td>
+          <td>CJ</td>
+          <td>배송출발</td>
+          <td class="text-new">대상제외(분리포배송)</td>
+          <td>송장기준</td>
+          <td>-</td>
+          <td>-</td>
+          <td class="text-new">분리배송 중복보상 제외</td>
+          <td>-</td>
+          <td>2026-03-31</td>
+          <td>-</td>
+          <td>2026-04-01 07:37</td>
+          <td>-</td>
+          <td>-</td>
+          <td>-</td>
+          <td>-</td>
+          <td>-</td>
+        </tr>
+        <tr class="new-row">
+          <td><input type="checkbox"></td>
+          <td><a href="#">510884608772</a></td>
+          <td><a href="#">4361669254</a></td>
+          <td>5479185989</td>
+          <td>G마켓</td>
+          <td>3796119015</td>
+          <td>a2gbj5</td>
+          <td>반품접수</td>
+          <td>CJ</td>
+          <td>배송중</td>
+          <td class="text-new">대상제외(클레임)</td>
+          <td>송장기준</td>
+          <td>-</td>
+          <td>-</td>
+          <td class="text-new">클레임 자동제외</td>
+          <td>-</td>
+          <td>2026-03-31</td>
+          <td>-</td>
+          <td>2026-04-01 07:37</td>
+          <td>-</td>
+          <td>-</td>
+          <td>-</td>
+          <td>-</td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td><input type="checkbox"></td>
+          <td><a href="#">510884608773</a></td>
+          <td><a href="#">4361669255</a></td>
+          <td>5479185990</td>
+          <td>G마켓</td>
+          <td>1677460336</td>
+          <td>a2gbj5</td>
+          <td>배송중</td>
+          <td>CJ</td>
+          <td>미배달</td>
+          <td>미배달(미보상)</td>
+          <td>송장기준</td>
+          <td>미보상</td>
+          <td>-</td>
+          <td>-</td>
+          <td>-</td>
+          <td>2026-03-31</td>
+          <td>-</td>
+          <td>2026-04-01 07:37</td>
+          <td>-</td>
+          <td>-</td>
+          <td>-</td>
+          <td>-</td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td><input type="checkbox"></td>
+          <td><a href="#">595146673100</a></td>
+          <td><a href="#">4361669300</a></td>
+          <td>5479186000</td>
+          <td>G마켓</td>
+          <td>3796119100</td>
+          <td>a2gbj5</td>
+          <td>배송완료</td>
+          <td>CJ</td>
+          <td>배송완료</td>
+          <td>배송완료(미보상)</td>
+          <td>송장기준</td>
+          <td>미보상</td>
+          <td>-</td>
+          <td>-</td>
+          <td>-</td>
+          <td>2026-03-31</td>
+          <td>2026-03-30</td>
+          <td>-</td>
+          <td>-</td>
+          <td>-</td>
+          <td>-</td>
+          <td>-</td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td><input type="checkbox"></td>
+          <td><a href="#">595146723045</a></td>
+          <td><a href="#">4578017393</a></td>
+          <td>5479187000</td>
+          <td>G마켓</td>
+          <td>3796119200</td>
+          <td>a2gbj5</td>
+          <td>배송완료</td>
+          <td>CJ</td>
+          <td>배송완료</td>
+          <td>보상처리(수동)</td>
+          <td>송장기준</td>
+          <td>알리</td>
+          <td>수동보상</td>
+          <td>-</td>
+          <td>운영 판단에 의한 수동 보상</td>
+          <td>2026-03-31</td>
+          <td>2026-04-02</td>
+          <td>2026-04-02 10:25</td>
+          <td>수동전송성공</td>
+          <td>지급완료</td>
+          <td>2026-04-02 11:30</td>
+          <td>전송성공</td>
+          <td>2026-04-02</td>
+        </tr>
+        <tr>
+          <td><input type="checkbox"></td>
+          <td><a href="#">595146673254</a></td>
+          <td><a href="#">1896169677</a></td>
+          <td>5479188000</td>
+          <td>옥션</td>
+          <td>1896169677</td>
+          <td>a2gbj5</td>
+          <td>배송완료</td>
+          <td>CJ</td>
+          <td>배송완료</td>
+          <td>보상제외(수동)</td>
+          <td>송장기준</td>
+          <td>-</td>
+          <td>-</td>
+          <td>수동제외</td>
+          <td>운영 판단에 의한 수동 제외</td>
+          <td>2026-03-31</td>
+          <td>2026-04-01</td>
+          <td>2026-04-01 07:37</td>
+          <td>-</td>
+          <td>-</td>
+          <td>-</td>
+          <td>-</td>
+          <td>-</td>
+        </tr>
+        <tr class="new-row">
+          <td><input type="checkbox"></td>
+          <td>-</td>
+          <td><a href="#">1579106890</a></td>
+          <td>5479189000</td>
+          <td>옥션</td>
+          <td>1579106890</td>
+          <td>a2gbj5</td>
+          <td>배송준비중</td>
+          <td>-</td>
+          <td>-</td>
+          <td class="text-new">대상확정(미발송)</td>
+          <td><b>주문기준</b></td>
+          <td>알리</td>
+          <td>미발송</td>
+          <td>-</td>
+          <td>-</td>
+          <td>2026-03-31</td>
+          <td>-</td>
+          <td>2026-04-01 07:37</td>
+          <td>수동전송성공</td>
+          <td>처리대기</td>
+          <td>-</td>
+          <td>전송성공</td>
+          <td>2026-04-01</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <hr class="section-divider">
+
+  <h2 class="section-h2">2. 보상 집계 내역</h2>
+
+  <p class="text-muted" style="font-size: 0.9rem;">
+    * 쿠폰 1건당 발행 금액 1,500원. 쿠폰 발행 건수만 집계되며 사용률(쿠폰 사용 여부)은 본 어드민에서 관리하지 않습니다.
+  </p>
+
+  <!-- 집계 검색 카드 -->
+  <div class="card search-card shadow-sm mb-4">
+    <div class="row row-search">
+      <div class="col-md-1 label-col">집계일자</div>
+      <div class="col-md-4">
+        <div class="input-group input-group-sm">
+          <input type="date" class="form-control" value="2026-03-25">
+          <span class="input-group-text">~</span>
+          <input type="date" class="form-control" value="2026-04-01">
+        </div>
+      </div>
+      <div class="col-md-4 d-flex align-items-center">
+        <button class="btn btn-sm btn-preset">오늘</button>
+        <button class="btn btn-sm btn-preset">1주일</button>
+        <button class="btn btn-sm btn-preset">1개월</button>
+        <button class="btn btn-sm btn-preset">3개월</button>
+      </div>
+      <div class="col-md-1 label-col">사이트</div>
+      <div class="col-md-2">
+        <select class="form-select form-select-sm">
+          <option>전체</option>
+          <option>G마켓</option>
+          <option>옥션</option>
+        </select>
+      </div>
+    </div>
+    <div class="row row-search mt-3">
+      <div class="col-md-12 text-center">
+        <button class="btn btn-sm btn-search me-2" style="padding: 5px 30px;">조회</button>
+        <button class="btn btn-sm btn-secondary" style="padding: 5px 30px;">초기화</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 산식 안내 -->
+  <div class="formula-note">
+    <b>보상비율(%)</b> = (쿠폰 발행 송장 + 쿠폰 발행 주문) / 송장건수 × 100 &nbsp;|&nbsp;
+    <b>도착보장율(%)</b> = 배송완료 / (송장건수 − 자동제외 송장) × 100 &nbsp;|&nbsp;
+    <b>총 발행 금액</b> = (쿠폰 발행 송장 + 쿠폰 발행 주문) × 1,500원
+  </div>
+
+  <!-- 엑셀 다운로드 -->
+  <div class="d-flex justify-content-end align-items-center mb-2">
+    <button class="btn btn-sm btn-copy me-1">클립보드로 전체복사</button>
+    <button class="btn btn-sm btn-excel">엑셀 다운로드</button>
+  </div>
+
+  <!-- 집계 데이터 테이블 -->
+  <div class="table-wrap">
+    <table class="table-summary">
+      <thead>
+        <tr>
+          <th rowspan="3">번호</th>
+          <th rowspan="3">집계일자</th>
+          <th rowspan="3">데이터구분</th>
+          <th colspan="4">도착보장 집계</th>
+          <th colspan="4">보상 확정</th>
+          <th rowspan="3">수동보상</th>
+          <th colspan="5">미보상</th>
+          <th colspan="4">쿠폰 발행 결과</th>
+          <th colspan="2">보상 참고 지표</th>
+        </tr>
+        <tr>
+          <th rowspan="2">합계</th>
+          <th rowspan="2">송장건수</th>
+          <th rowspan="2" class="text-new">미발송<br>건수(주문)</th>
+          <th rowspan="2" class="text-new">미발송<br>비율</th>
+          <th colspan="3">송장 기준</th>
+          <th rowspan="2" class="text-new">대상확정<br>(미발송)</th>
+          <th rowspan="2">배송완료</th>
+          <th rowspan="2">미배달사유</th>
+          <th rowspan="2">수동제외</th>
+          <th>자동제외(송장)</th>
+          <th>자동제외(주문)</th>
+          <th rowspan="2">중복보상<br>제외송장수</th>
+          <th rowspan="2" class="text-new">쿠폰 발행<br>건수(송장)</th>
+          <th rowspan="2" class="text-new">쿠폰 발행<br>건수(주문)</th>
+          <th rowspan="2" class="text-new">총 발행 금액</th>
+          <th rowspan="2" class="text-new">보상비율(%)</th>
+          <th rowspan="2">도착보장율(%)</th>
+        </tr>
+        <tr>
+          <th class="text-new">합계</th>
+          <th>알리귀책</th>
+          <th>택배사귀책</th>
+          <th>클레임<br>제외</th>
+          <th>클레임<br>제외</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td><td>2026-04-01</td><td>매일</td>
+          <td>10,065</td><td>10,050</td><td class="new-col">15</td><td class="new-col">0.149%</td>
+          <td class="new-col">227</td><td>15</td><td>200</td><td class="new-col">12</td>
+          <td>0</td>
+          <td>9,800</td><td>20</td><td>0</td><td>15</td><td>3</td>
+          <td>5</td><td class="new-col">210</td><td class="new-col">12</td><td class="new-col">333,000</td>
+          <td class="new-col">2.209%</td><td>97.658%</td>
+        </tr>
+        <tr>
+          <td>2</td><td>2026-03-31</td><td>매일</td>
+          <td>9,812</td><td>9,792</td><td class="new-col">20</td><td class="new-col">0.204%</td>
+          <td class="new-col">275</td><td>20</td><td>240</td><td class="new-col">15</td>
+          <td>0</td>
+          <td>9,500</td><td>20</td><td>0</td><td>12</td><td>5</td>
+          <td>7</td><td class="new-col">253</td><td class="new-col">15</td><td class="new-col">402,000</td>
+          <td class="new-col">2.737%</td><td>97.137%</td>
+        </tr>
+        <tr>
+          <td>3</td><td>2026-03-30</td><td>매일</td>
+          <td>11,306</td><td>11,284</td><td class="new-col">22</td><td class="new-col">0.195%</td>
+          <td class="new-col">310</td><td>22</td><td>270</td><td class="new-col">18</td>
+          <td>2</td>
+          <td>10,950</td><td>30</td><td>0</td><td>10</td><td>4</td>
+          <td>6</td><td class="new-col">288</td><td class="new-col">18</td><td class="new-col">459,000</td>
+          <td class="new-col">2.712%</td><td>97.126%</td>
+        </tr>
+        <tr>
+          <td>4</td><td>2026-03-29</td><td>매일</td>
+          <td>9,201</td><td>9,189</td><td class="new-col">12</td><td class="new-col">0.130%</td>
+          <td class="new-col">223</td><td>18</td><td>195</td><td class="new-col">10</td>
+          <td>0</td>
+          <td>8,950</td><td>18</td><td>0</td><td>8</td><td>2</td>
+          <td>4</td><td class="new-col">209</td><td class="new-col">10</td><td class="new-col">328,500</td>
+          <td class="new-col">2.383%</td><td>97.484%</td>
+        </tr>
+        <tr>
+          <td>5</td><td>2026-03-28</td><td>매일</td>
+          <td>8,126</td><td>8,116</td><td class="new-col">10</td><td class="new-col">0.123%</td>
+          <td class="new-col">180</td><td>12</td><td>160</td><td class="new-col">8</td>
+          <td>0</td>
+          <td>7,920</td><td>15</td><td>0</td><td>9</td><td>2</td>
+          <td>3</td><td class="new-col">169</td><td class="new-col">8</td><td class="new-col">265,500</td>
+          <td class="new-col">2.181%</td><td>97.693%</td>
+        </tr>
+        <tr>
+          <td>6</td><td>2026-03-27</td><td>매일</td>
+          <td>12,440</td><td>12,414</td><td class="new-col">26</td><td class="new-col">0.209%</td>
+          <td class="new-col">330</td><td>25</td><td>285</td><td class="new-col">20</td>
+          <td>0</td>
+          <td>12,050</td><td>35</td><td>1</td><td>18</td><td>6</td>
+          <td>8</td><td class="new-col">302</td><td class="new-col">20</td><td class="new-col">483,000</td>
+          <td class="new-col">2.594%</td><td>97.209%</td>
+        </tr>
+        <tr>
+          <td>7</td><td>2026-03-26</td><td>매일</td>
+          <td>10,708</td><td>10,691</td><td class="new-col">17</td><td class="new-col">0.159%</td>
+          <td class="new-col">248</td><td>19</td><td>215</td><td class="new-col">14</td>
+          <td>1</td>
+          <td>10,420</td><td>25</td><td>0</td><td>11</td><td>3</td>
+          <td>6</td><td class="new-col">229</td><td class="new-col">14</td><td class="new-col">364,500</td>
+          <td class="new-col">2.273%</td><td>97.566%</td>
+        </tr>
+        <tr>
+          <td>8</td><td>2026-03-25</td><td>매일</td>
+          <td>8,986</td><td>8,975</td><td class="new-col">11</td><td class="new-col">0.122%</td>
+          <td class="new-col">205</td><td>16</td><td>180</td><td class="new-col">9</td>
+          <td>0</td>
+          <td>8,750</td><td>22</td><td>0</td><td>7</td><td>2</td>
+          <td>4</td><td class="new-col">192</td><td class="new-col">9</td><td class="new-col">301,500</td>
+          <td class="new-col">2.240%</td><td>97.569%</td>
+        </tr>
+      </tbody>
+      <tfoot style="background-color: #d1d2d4; font-weight: bold;">
+        <tr>
+          <td colspan="3">합계</td>
+          <td>80,644</td><td>80,511</td><td class="new-col">133</td><td class="new-col">-</td>
+          <td class="new-col">1,998</td><td>147</td><td>1,745</td><td class="new-col">106</td>
+          <td>3</td>
+          <td>78,340</td><td>185</td><td>1</td><td>90</td><td>27</td>
+          <td>43</td><td class="new-col">1,852</td><td class="new-col">106</td><td class="new-col">2,937,000</td>
+          <td class="new-col">-</td><td>-</td>
+        </tr>
+      </tfoot>
+    </table>
+    <div class="mt-2" style="font-size: 12px; color: #6c757d;">총 8건 중 1에서 8까지 표시</div>
   </div>
 
 </div>
+
+<!-- 보상제외(수동) 상태변경 모달 -->
+<div class="modal fade exclude-modal" id="excludeModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">보상제외(수동) 상태변경</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="info-text">
+          선택하신 <span id="ex-type">송장번호</span> <b id="ex-count">1</b>건의 보상상태를 다음과 같이 변경합니다.
+        </div>
+
+        <div class="form-row">
+          <label>변경상태</label>
+          <div class="radio-group" style="flex:1; padding-top:4px;">
+            <label><input type="radio" name="ex-status" checked> 보상제외(수동)</label>
+          </div>
+        </div>
+        <div class="form-row">
+          <label>변경사유</label>
+          <textarea placeholder="변경 사유를 입력해주세요"></textarea>
+        </div>
+
+        <div class="notice-box">
+          <ul>
+            <li>보상제외(수동) 처리는 보상지급요청 전까지만 변경 가능합니다.</li>
+            <li>보상제외(수동)으로 상태 변경된 건은 '수동 보상' 처리가 제한됩니다.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary btn-sm" id="ex-submit" style="background:#18bc9c; border-color:#18bc9c;">저장</button>
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">닫기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 보상 수동 처리 모달 -->
+<div class="modal fade reward-confirm-modal" id="rewardConfirmModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">보상 수동 처리</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="info-text">
+          선택하신 송장번호 <b id="rc-count">1</b>건의 보상상태를 다음과 같이 변경합니다.
+        </div>
+
+        <div class="form-row">
+          <label>보상 사유</label>
+          <input type="text" value="보상 수동 처리" readonly>
+        </div>
+        <div class="form-row">
+          <label>보상 상태</label>
+          <input type="text" value="보상대상 확정(수동)" readonly>
+        </div>
+        <div class="form-row">
+          <label>쿠폰 지급 요청 일자</label>
+          <input type="text" id="rc-date" value="" readonly>
+        </div>
+        <div class="form-row">
+          <label>보상 금액</label>
+          <input type="text" value="송장당 쿠폰 1,500원" readonly>
+        </div>
+        <div class="form-row">
+          <label>보상 상세 사유</label>
+          <textarea placeholder="선택 입력 가능 (고객에게 미노출)"></textarea>
+        </div>
+
+        <div class="warning-box">
+          ⚠ 수동 처리 즉시 쿠폰 지급 요청이 발생하며 취소가 불가합니다.
+        </div>
+        <p class="confirm-text">안내문구를 모두 확인했으며, 수동 보상 확정을 진행합니다.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">취소</button>
+        <button type="button" class="btn btn-primary btn-sm" id="rc-submit" style="background:#18bc9c; border-color:#18bc9c;">등록</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 주문정보 상세 모달 -->
+<div class="modal fade order-detail-modal" id="orderDetailModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">구매정보</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+
+        <div class="section-title">주문정보</div>
+        <table class="table-detail">
+          <tbody>
+            <tr>
+              <th>상품번호</th><td id="d-prdNo">-</td>
+              <th>주문번호</th><td id="d-orderNo">-</td>
+            </tr>
+            <tr>
+              <th>상품명</th><td colspan="3" id="d-prdName">-</td>
+            </tr>
+            <tr>
+              <th>수량</th><td colspan="3" id="d-qty">-</td>
+            </tr>
+            <tr>
+              <th>주문옵션</th><td id="d-option">-</td>
+              <th>추가구성</th><td id="d-addOption">-</td>
+            </tr>
+            <tr>
+              <th>사은품</th><td colspan="3" id="d-gift">-</td>
+            </tr>
+            <tr>
+              <th>구매금액</th><td colspan="3" class="value-bold" id="d-price">-</td>
+            </tr>
+            <tr>
+              <th>배송비</th><td id="d-shipFee">-</td>
+              <th>배송방법</th><td id="d-shipMethod">-</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="section-title">선물수신정보</div>
+        <table class="table-detail">
+          <tbody>
+            <tr>
+              <th>선물주문여부</th><td id="d-giftOrder">-</td>
+              <th>선물수락마감일</th><td id="d-giftDeadline">-</td>
+            </tr>
+            <tr>
+              <th>선물주문상태</th><td id="d-giftStat">-</td>
+              <th>선물수락일시</th><td id="d-giftAcceptAt">-</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="section-title">구매자정보</div>
+        <table class="table-detail">
+          <tbody>
+            <tr>
+              <th>구매자ID</th><td id="d-buyerId">-</td>
+              <th>구매자이름</th><td id="d-buyerName">-</td>
+            </tr>
+            <tr>
+              <th>연락처1</th><td id="d-buyerTel1">-</td>
+              <th>연락처2</th><td id="d-buyerTel2">-</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="section-title">배송지정보</div>
+        <table class="table-detail">
+          <tbody>
+            <tr>
+              <th>상품수령인</th><td colspan="3" id="d-receiver">-</td>
+            </tr>
+            <tr>
+              <th>연락처1</th><td id="d-recvTel1">-</td>
+              <th>연락처2</th><td id="d-recvTel2">-</td>
+            </tr>
+            <tr>
+              <th>배송지주소</th><td colspan="3" id="d-address">-</td>
+            </tr>
+            <tr>
+              <th>배송 요청사항</th><td colspan="3" id="d-shipMemo">-</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="section-title">배송 진행 정보</div>
+        <table class="table-detail">
+          <thead>
+            <tr>
+              <th style="background:#f0f0f0; text-align:center; width:auto;">처리일시</th>
+              <th style="background:#f0f0f0; text-align:center; width:auto;">처리구분</th>
+              <th style="background:#f0f0f0; text-align:center; width:80px;">상세보기</th>
+            </tr>
+          </thead>
+          <tbody id="d-shipLog">
+            <tr><td colspan="3" style="text-align:center;">진행 내역 없음</td></tr>
+          </tbody>
+        </table>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// 샘플 주문 상세 데이터 (실제론 서버 API에서 조회)
+const orderDetailSamples = {
+  '4361669123': {
+    prdNo: '8003490840', orderNo: '4361669123',
+    prdName: '아워박스/SKU 91175/ 2 PCS',
+    qty: '3 개', option: '-', addOption: '-', gift: '-',
+    price: '45,000 원', shipFee: '-', shipMethod: '일반택배',
+    giftOrder: 'N', giftDeadline: '-', giftStat: '-', giftAcceptAt: '-',
+    buyerId: 'anysoon', buyerName: '김중엽',
+    buyerTel1: '010-4116-3333', buyerTel2: '02-123-4567',
+    receiver: '추이린', recvTel1: '010-7927-7944', recvTel2: '010-7927-7944',
+    address: '(06236) 서울특별시 강남구 테헤란로 152 (강남파이낸스센터) 35층',
+    shipMemo: '-',
+    shipLog: [
+      { date: '2026-04-01 14:32', type: '배송완료', detail: '보기' },
+      { date: '2026-04-01 08:10', type: '배송출발', detail: '보기' },
+      { date: '2026-03-31 21:05', type: '집화처리', detail: '보기' }
+    ]
+  }
+};
+
+function openOrderDetail(orderNo) {
+  const data = orderDetailSamples[orderNo] || orderDetailSamples['4361669123'];
+  // 데이터 채우기
+  Object.keys(data).forEach(key => {
+    const el = document.getElementById('d-' + key);
+    if (el && key !== 'shipLog') el.textContent = data[key] || '-';
+  });
+  // 배송 진행 정보
+  const logBody = document.getElementById('d-shipLog');
+  if (data.shipLog && data.shipLog.length > 0) {
+    logBody.innerHTML = data.shipLog.map(row =>
+      `<tr><td style="text-align:center;">${row.date}</td><td style="text-align:center;">${row.type}</td><td style="text-align:center;"><a href="#">${row.detail}</a></td></tr>`
+    ).join('');
+  } else {
+    logBody.innerHTML = '<tr><td colspan="3" style="text-align:center;">진행 내역 없음</td></tr>';
+  }
+  const modal = new bootstrap.Modal(document.getElementById('orderDetailModal'));
+  modal.show();
+}
+
+$(document).ready(function() {
+  // 주문정보 상세보기 버튼
+  $('.btn-action').filter(function() { return $(this).text().trim() === '주문정보 상세보기'; }).on('click', function() {
+    const checked = $('#rewardTable tbody input[type=checkbox]:checked').closest('tr');
+    if (checked.length === 0) {
+      alert('주문을 선택해주세요.');
+      return;
+    }
+    if (checked.length > 1) {
+      alert('1건만 선택해주세요.');
+      return;
+    }
+    const orderNo = checked.find('td:eq(2)').text().trim();
+    openOrderDetail(orderNo);
+  });
+
+  // 테이블 안의 송장번호/주문번호 링크 클릭
+  $('#rewardTable tbody a').on('click', function(e) {
+    e.preventDefault();
+    const orderNo = $(this).closest('tr').find('td:eq(2)').text().trim();
+    openOrderDetail(orderNo);
+  });
+
+  // 보상 수동 확정 버튼
+  $('.btn-action').filter(function() {
+    return $(this).text().trim() === '보상 수동 확정';
+  }).on('click', function() {
+    const checked = $('#rewardTable tbody input[type=checkbox]:checked').closest('tr');
+    if (checked.length === 0) {
+      alert('주문을 선택해주세요.');
+      return;
+    }
+    // 주문기준 건은 수동 보상 불가 (피드백 메모 기준)
+    let hasOrderBased = false;
+    checked.each(function() {
+      if ($(this).find('td:eq(11)').text().trim() === '주문기준') {
+        hasOrderBased = true;
+      }
+    });
+    if (hasOrderBased) {
+      alert('수동 보상은 송장기준 건만 처리 가능합니다.\n주문기준 건을 제외하고 다시 선택해주세요.');
+      return;
+    }
+    $('#rc-count').text(checked.length);
+    const today = new Date().toISOString().slice(0, 10);
+    $('#rc-date').val(today);
+    $('#rewardConfirmModal textarea').val('');
+    const modal = new bootstrap.Modal(document.getElementById('rewardConfirmModal'));
+    modal.show();
+  });
+
+  // 등록 버튼
+  $('#rc-submit').on('click', function() {
+    alert('보상 수동 확정이 등록되었습니다.\n쿠폰 지급 요청이 발생합니다.');
+    bootstrap.Modal.getInstance(document.getElementById('rewardConfirmModal')).hide();
+  });
+
+  // 보상제외(수동) 모달 열기 함수
+  function openExcludeModal(criterionType) {
+    const checked = $('#rewardTable tbody input[type=checkbox]:checked').closest('tr');
+    if (checked.length === 0) {
+      alert('주문을 선택해주세요.');
+      return;
+    }
+    // 선택 건이 모두 같은 집계기준이어야 함 (피드백 메모 기준)
+    let mismatch = false;
+    checked.each(function() {
+      const rowType = $(this).find('td:eq(11)').text().trim();
+      if (rowType !== criterionType) { mismatch = true; }
+    });
+    if (mismatch) {
+      const otherType = criterionType === '송장기준' ? '주문기준' : '송장기준';
+      alert(criterionType + ' 보상제외는 ' + criterionType + ' 건만 선택 가능합니다.\n' + otherType + ' 건을 제외하고 다시 선택해주세요.');
+      return;
+    }
+    const label = criterionType === '송장기준' ? '송장번호' : '주문번호';
+    $('#ex-type').text(label);
+    $('#ex-count').text(checked.length);
+    $('#excludeModal textarea').val('');
+    const modal = new bootstrap.Modal(document.getElementById('excludeModal'));
+    modal.show();
+  }
+
+  // 송장기준 보상제외(수동) 버튼
+  $('.btn-action').filter(function() {
+    return $(this).text().trim() === '송장기준 보상제외(수동)';
+  }).on('click', function() {
+    openExcludeModal('송장기준');
+  });
+
+  // 주문기준 보상제외(수동) 버튼
+  $('.btn-action').filter(function() {
+    return $(this).text().trim() === '주문기준 보상제외(수동)';
+  }).on('click', function() {
+    openExcludeModal('주문기준');
+  });
+
+  // 저장 버튼
+  $('#ex-submit').on('click', function() {
+    const reason = $('#excludeModal textarea').val().trim();
+    if (!reason) {
+      alert('변경 사유를 입력해주세요.');
+      return;
+    }
+    alert('보상제외(수동) 상태로 변경되었습니다.');
+    bootstrap.Modal.getInstance(document.getElementById('excludeModal')).hide();
+  });
+
+  $('#rewardTable').DataTable({
+    "paging": true,
+    "searching": false,
+    "info": true,
+    "ordering": true,
+    "scrollX": true,
+    "scrollCollapse": true,
+    "pageLength": 10,
+    "language": {
+      "info": "총 _TOTAL_건 중 _START_에서 _END_까지 표시",
+      "infoEmpty": "0건",
+      "paginate": { "previous": "이전", "next": "다음" },
+      "lengthMenu": "_MENU_ 건씩 보기",
+      "zeroRecords": "검색 결과가 없습니다"
+    }
+  });
+
+  // 기간 프리셋 - 클릭한 버튼이 속한 카드 안의 input만 변경
+  $('.btn-preset').on('click', function() {
+    const today = new Date();
+    const end = today.toISOString().slice(0, 10);
+    let start = end;
+    const text = $(this).text().trim();
+    if (text === '오늘') start = end;
+    else if (text === '1주일') { const d = new Date(); d.setDate(d.getDate()-7); start = d.toISOString().slice(0,10); }
+    else if (text === '1개월') { const d = new Date(); d.setMonth(d.getMonth()-1); start = d.toISOString().slice(0,10); }
+    else if (text === '3개월') { const d = new Date(); d.setMonth(d.getMonth()-3); start = d.toISOString().slice(0,10); }
+    const $card = $(this).closest('.card.search-card');
+    const $dates = $card.find('input[type=date]');
+    $dates.eq(0).val(start);
+    $dates.eq(1).val(end);
+  });
+});
+</script>
 
 </body>
 </html>
